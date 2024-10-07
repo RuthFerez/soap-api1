@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+	<flow name="soap-api1Flow" doc:id="72ec5ff6-f941-428a-b327-69fc5403fa4e" >
+		<http:listener doc:name="Listener" doc:id="c0eabd3e-ae10-4de2-b705-e312cf3e740b" config-ref="HTTP_Listener_config" path="/path"/>
+		<ee:transform doc:name="Transform Message" doc:id="6beaabf8-c581-4c8f-acd9-d43025e67832" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://tempuri.org/
+
+---
+ {
+    ns0#Add: {
+      ns0#intA: payload.intA,   // Hard-coded value for intA
+      ns0#intB: payload.intB    // Hard-coded value for intB
+    }
+ }
+
+]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="header" ><![CDATA[%dw 2.0
+output application/xml
+ns soapenv http://www.w3.org/2003/05/soap-envelope
+---
+headers: {soapenv#Envelope: {
+  soapenv#Header: {}
+}
+}
+
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message" doc:id="0185ceb3-9e3c-4516-8b1a-5433a71fcbd9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://tempuri.org/
+&#45;&#45;-
+ns0#Add: {
+  ns0#intA: payload.intA,   // Hard-coded value for intA
+  ns0#intB: payload.intB   // Hard-coded value for intB
+}
+&#93;&#93;></ee:set-payload>
+			</ee:message>
+		</ee:transform> [STUDIO] -->
+		<!-- [STUDIO:"Transform Message"]<ee:transform doc:name="Transform Message" doc:id="adb87886-50ba-44bf-b55c-0cfcbf655462" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+ns tem http://tempuri.org/
+var intA = 9
+var intB = 10
+&#45;&#45;-
+{
+    tem#Divide: {
+        tem#intA: intA,
+        tem#intB: intB
+    }
+}
+&#93;&#93;></ee:set-payload>
+			</ee:message>
+		</ee:transform> [STUDIO] -->
+		<wsc:consume operation="Add" doc:name="Consume" doc:id="843bcd09-832b-40dc-a551-26f63f4a3d4f" config-ref="Web_Service_Consumer_Config">
+			<wsc:message >
+				<wsc:headers ><![CDATA[#[vars.header]]]></wsc:headers>
+			</wsc:message>
+		</wsc:consume>
+		<ee:transform doc:name="Transform Message" doc:id="9dbd745f-0ad2-4309-a4f5-0e17d692d557" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.body]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
