@@ -1,5 +1,6 @@
 {
   "minMuleVersion": "4.7.0",
+  "type": "soap-api",
   "javaSpecificationVersions": [
     "1.8"
   ]
